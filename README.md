@@ -15,7 +15,7 @@ func NewLogger( config map[string]interface{} ) *log.Logger {
 	if Log != nil {
 		return Log
 	}
-	
+
 	Log = log.New()
 	Log.Formatter = new(log.JSONFormatter)
 	Log.Hooks.Add(lfshook.NewHook(lfshook.PathMap{
@@ -24,6 +24,31 @@ func NewLogger( config map[string]interface{} ) *log.Logger {
 	}))
 	return Log
 }
+```
+
+### Formatters
+lfshook will strip colors from any TextFormatter type formatters when writing to local file, because the color codes don't look so great.
+
+### Log rotation
+In order to enable automatic log rotation it's possible to provide an io.Writer instead of the path string of a log file.
+In combination with pakages like [go-file-rotatelogs](https://github.com/lestrrat/go-file-rotatelogs) log rotation can easily be achieved.
+
+```go
+  import "github.com/lestrrat/go-file-rotatelogs"
+
+  path := "/var/log/go.log"
+  writer := rotatelogs.NewRotateLogs(
+    path + ".%Y%m%d%H%M", // rotation pattern
+  )
+  writer.LinkName = path
+  writer.RotationTime = time.Duration(86400) * time.Second // rotate once a day
+  writer.MaxAge = time.Duration(604800) * time.Second // keep one week of log files
+  writer.Offset = 0
+
+  log.Hooks.Add(lfshook.NewHook(lfshook.WriterMap{
+    logrus.InfoLevel: writer,
+    logrus.ErrorLevel: writer,
+  }))
 ```
 
 ### Note:
