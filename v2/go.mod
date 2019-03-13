@@ -1,4 +1,4 @@
-module github.com/visenze/logrus_lfshook
+module github.com/visenze/logrus_lfshook/v2
 
 go 1.12
 
